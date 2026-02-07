@@ -1,85 +1,61 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code when working in this repository.
 
-## Project Overview
+## Agent System
 
-This repository contains a comprehensive agent system designed to streamline development workflows. The agents work together autonomously to handle various aspects of software development.
+This project uses an autonomous agent system. Agents activate automatically based on context - you don't need to invoke them manually.
 
-## Agent System Architecture
+### Available Agents
 
-### Core Agents
+| Agent | Triggers When | Purpose |
+|-------|--------------|---------|
+| **architect** | Complex multi-step features, architectural decisions | Plans and coordinates |
+| **code-writer** | "implement", "create", "add", "build" | Writes code |
+| **code-reviewer** | Code is ready for review | Quality & security check |
+| **debugger** | Bug reports, errors, "fix", "debug" | Investigates and fixes |
+| **test-writer** | "add tests", feature complete | Creates tests |
+| **documentation-writer** | "document", feature complete | Updates docs |
+| **git-manager** | Code approved, "commit", "push" | Git operations |
 
-1. **Architect** (.claude/agents/architect.md)
-   - Main orchestrator that analyzes requirements and delegates tasks
-   - Creates implementation plans and manages workflow between agents
+### Workflow
 
-2. **Project Context Manager** (.claude/agents/project-context-manager.md)
-   - Maintains PLANNING.md with project information
-   - Updates documentation after feature implementations
+Agents work in chains:
+```
+code-writer → code-reviewer → test-writer → git-manager
+debugger → code-reviewer → test-writer → git-manager
+```
 
-3. **Task Manager** (.claude/agents/task-manager.md)
-   - Maintains TASKS.md for active tasks
-   - Archives completed tasks to ARCHIVED_TASKS.md after 20 completions
+### Task Management
 
-4. **Code Writer** (.claude/agents/code-writer.md)
-   - Implements features across multiple tech stacks
-   - Follows project conventions and patterns
+Uses Claude's native task system:
+- `TaskCreate` - Create new tasks
+- `TaskUpdate` - Update status (pending → in_progress → completed)
+- `TaskList` - View all tasks
 
-5. **Git Manager** (.claude/agents/git-manager.md)
-   - Creates micro-commits for checkpoint functionality
-   - Manages feature branches and pull requests
+No manual TASKS.md file needed.
 
-6. **Code Reviewer** (.claude/agents/code-reviewer.md)
-   - Reviews all code changes for quality
-   - Checks syntax, style, security, performance, and best practices
+## Project Context
 
-7. **Debugger** (.claude/agents/debugger.md)
-   - Identifies and fixes bugs
-   - Provides detailed diagnostic reports
+### Technology Stack
+<!-- Update with your project's tech stack -->
+- Frontend:
+- Backend:
+- Database:
+- Other:
 
-8. **Test Writer** (.claude/agents/test-writer.md)
-   - Creates and maintains test suites
-   - Ensures adequate test coverage
+### Key Patterns
+<!-- Document patterns agents should follow -->
 
-9. **Documentation Writer** (.claude/agents/documentation-writer.md)
-   - Creates and updates technical documentation
-   - Maintains code comments and README files
 
-## Key Files
+### Important Files
+<!-- List critical files for context -->
 
-- **PLANNING.md** - Central project context document
-- **TASKS.md** - Active task tracking
-- **ARCHIVED_TASKS.md** - Historical task archive
-- **agent-workflows.md** - Detailed agent interaction patterns
 
-## Usage Instructions
+## Development Guidelines
 
-### Starting a New Feature
-1. Describe your requirement to the Architect agent
-2. The system will automatically:
-   - Create tasks in TASKS.md
-   - Update PLANNING.md
-   - Implement the feature with micro-commits
-   - Review and test the code
-   - Create a final feature commit
-
-### Agent Commands
-- Use `/agents` to see available agents
-- Agents operate with full autonomy
-- All agents have access to this context
-
-## Development Workflow
-
-1. **Micro-commits**: Every small change is committed for checkpoint functionality
-2. **Feature branches**: All work happens on feature branches
-3. **Automated reviews**: Code is reviewed before every commit
-4. **Task tracking**: All work is tracked in TASKS.md
-5. **Context maintenance**: PLANNING.md is kept up-to-date
-
-## Important Notes
-
-- Agents have full autonomy to make changes
-- All code changes trigger micro-commits
-- Tasks are automatically archived after 20 completions
-- The system is designed for solo development workflows
+- Follow existing code patterns
+- Handle errors gracefully
+- No hardcoded secrets
+- Write self-documenting code
+- Keep changes focused and atomic
