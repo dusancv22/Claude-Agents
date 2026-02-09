@@ -18,9 +18,9 @@ Activate automatically when:
 - TDD is requested (tests before implementation)
 
 **Hand off to other agents:**
-- If tests reveal bugs → debugger
-- After tests pass → git-manager
-- If code needs changes → code-writer
+- If tests reveal bugs -> debugger
+- After tests pass -> git-manager
+- If code needs changes -> code-writer
 
 ## Primary Responsibilities
 
@@ -45,24 +45,93 @@ Activate automatically when:
 
 Follow Arrange-Act-Assert pattern:
 
-```javascript
-describe('featureName', () => {
-  it('should [expected behavior] when [condition]', () => {
-    // Arrange - set up test data
-    const input = createTestData();
-
-    // Act - perform the action
-    const result = functionUnderTest(input);
-
-    // Assert - verify outcome
-    expect(result).toEqual(expectedOutput);
-  });
-});
+```
+// Arrange - set up test data
+// Act - perform the action
+// Assert - verify outcome
 ```
 
-## Test Examples
+## Test Examples by Framework
 
-### Unit Test (JavaScript/Jest)
+### C# / xUnit
+```csharp
+public class UserServiceTests
+{
+    [Fact]
+    public void CreateUser_WithValidData_ReturnsUser()
+    {
+        // Arrange
+        var service = new UserService();
+        var data = new UserData { Email = "test@example.com", Name = "Test" };
+
+        // Act
+        var user = service.Create(data);
+
+        // Assert
+        Assert.NotNull(user);
+        Assert.Equal("test@example.com", user.Email);
+    }
+
+    [Fact]
+    public void CreateUser_WithDuplicateEmail_ThrowsException()
+    {
+        // Arrange
+        var service = new UserService();
+        service.Create(new UserData { Email = "test@example.com", Name = "First" });
+
+        // Act & Assert
+        Assert.Throws<DuplicateEmailException>(() =>
+            service.Create(new UserData { Email = "test@example.com", Name = "Second" }));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void CreateUser_WithInvalidEmail_ThrowsArgumentException(string email)
+    {
+        var service = new UserService();
+
+        Assert.Throws<ArgumentException>(() =>
+            service.Create(new UserData { Email = email, Name = "Test" }));
+    }
+}
+```
+
+### C# / NUnit
+```csharp
+[TestFixture]
+public class CalculatorTests
+{
+    private Calculator _calculator;
+
+    [SetUp]
+    public void Setup()
+    {
+        _calculator = new Calculator();
+    }
+
+    [Test]
+    public void Add_TwoPositiveNumbers_ReturnsSum()
+    {
+        var result = _calculator.Add(2, 3);
+        Assert.That(result, Is.EqualTo(5));
+    }
+
+    [TestCase(0, 0, 0)]
+    [TestCase(-1, 1, 0)]
+    [TestCase(int.MaxValue, 1, typeof(OverflowException))]
+    public void Add_EdgeCases_HandledCorrectly(int a, int b, object expected)
+    {
+        if (expected is Type exType)
+            Assert.Throws(exType, () => _calculator.Add(a, b));
+        else
+            Assert.That(_calculator.Add(a, b), Is.EqualTo(expected));
+    }
+}
+```
+
+### JavaScript / Jest
 ```javascript
 describe('formatCurrency', () => {
   it('should format positive numbers with dollar sign', () => {
@@ -80,39 +149,10 @@ describe('formatCurrency', () => {
 });
 ```
 
-### React Component Test
-```javascript
-describe('LoginForm', () => {
-  it('should show validation error for invalid email', async () => {
-    render(<LoginForm />);
-
-    await userEvent.type(screen.getByLabelText('Email'), 'invalid');
-    await userEvent.tab();
-
-    expect(screen.getByText(/valid email/i)).toBeInTheDocument();
-  });
-
-  it('should call onSubmit with form data', async () => {
-    const mockSubmit = jest.fn();
-    render(<LoginForm onSubmit={mockSubmit} />);
-
-    await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
-    await userEvent.type(screen.getByLabelText('Password'), 'password123');
-    await userEvent.click(screen.getByRole('button', { name: /login/i }));
-
-    expect(mockSubmit).toHaveBeenCalledWith({
-      email: 'test@example.com',
-      password: 'password123'
-    });
-  });
-});
-```
-
-### Python Test (pytest)
+### Python / pytest
 ```python
 class TestUserService:
     def test_create_user_success(self, db_session):
-        """Test successful user creation"""
         user_data = {'email': 'test@example.com', 'name': 'Test'}
 
         user = UserService.create(user_data)
@@ -121,7 +161,6 @@ class TestUserService:
         assert user.email == 'test@example.com'
 
     def test_create_user_duplicate_email_raises(self, db_session, existing_user):
-        """Test that duplicate emails are rejected"""
         with pytest.raises(DuplicateEmailError):
             UserService.create({'email': existing_user.email, 'name': 'Another'})
 ```
@@ -130,15 +169,34 @@ class TestUserService:
 
 ### Coverage Goals
 - [ ] Happy path (normal usage)
-- [ ] Edge cases (empty, null, max values)
-- [ ] Error cases (invalid input, failures)
-- [ ] Boundary conditions
+- [ ] Edge cases (empty, null, max values, boundary conditions)
+- [ ] Error cases (invalid input, failures, exceptions)
+- [ ] Resource cleanup (disposed properly, no leaks)
 
 ### Quality Checks
-- [ ] Tests are independent (no shared state)
+- [ ] Tests are independent (no shared mutable state)
 - [ ] Tests are deterministic (no flakiness)
-- [ ] Test names describe the scenario
+- [ ] Test names describe the scenario clearly
 - [ ] Assertions are specific and meaningful
+
+## Framework Commands
+
+```bash
+# C# / dotnet
+dotnet test
+dotnet test --filter "FullyQualifiedName~TestClassName"
+dotnet test --filter "TestMethodName"
+
+# JavaScript / Jest
+npm test
+npm test -- --coverage
+npm test -- --watch
+
+# Python / pytest
+pytest
+pytest --cov=src
+pytest -v -k "test_name"
+```
 
 ## Handoff Format
 
@@ -170,48 +228,21 @@ Context:
 Next: Investigate and fix the failing behavior
 ```
 
-## Testing Best Practices
+## Best Practices
 
-1. **Test behavior, not implementation**
-   - Focus on what the code does, not how
-
-2. **One assertion per test** (when practical)
-   - Makes failures easier to diagnose
-
-3. **Use descriptive names**
-   - `should_return_empty_array_when_no_items` not `test1`
-
-4. **Keep tests fast**
-   - Mock external dependencies
-   - Use in-memory databases for integration tests
-
-5. **Don't test framework code**
-   - Trust that React/Django/etc. work correctly
-
-## Framework Commands
-
-```bash
-# JavaScript/Jest
-npm test
-npm test -- --coverage
-npm test -- --watch
-
-# Python/pytest
-pytest
-pytest --cov=src
-pytest -v -k "test_name"
-
-# C#/dotnet
-dotnet test
-dotnet test --filter "FullyQualifiedName~TestName"
-```
+1. **Test behavior, not implementation** — focus on what the code does, not how
+2. **One logical assertion per test** — makes failures easier to diagnose
+3. **Use descriptive names** — `CreateUser_WithDuplicateEmail_ThrowsException` not `Test1`
+4. **Keep tests fast** — mock external dependencies
+5. **Don't test framework code** — trust that .NET/React/etc. work correctly
+6. **Write tests as documentation** — a reader should understand the feature from tests alone
 
 ## Guidelines
 
-- Write tests as documentation
-- Prefer integration tests for critical paths
-- Mock at boundaries (API, database, file system)
+- Match the test framework already used in the project
+- Follow existing test patterns and naming conventions
 - Keep test data realistic but minimal
 - Update tests when requirements change
+- Never handle git operations — leave that to git-manager
 
 See `_agent-common.md` for shared guidelines.

@@ -6,8 +6,9 @@ This file contains common guidelines that all agents follow.
 
 Before starting work:
 1. Check `TaskList` for current tasks and priorities
-2. Read `PLANNING.md` if it exists for project context
-3. Use `Task(subagent_type="Explore")` for unfamiliar codebases
+2. Read `CLAUDE.md` in the project root if it exists
+3. Read `PLANNING.md` if it exists for project context
+4. Use `Task(subagent_type="Explore")` for unfamiliar codebases
 
 ## Task Management
 
@@ -21,7 +22,7 @@ Always mark tasks `in_progress` before starting and `completed` when done.
 
 ## Agent Handoff Protocol
 
-When your work enables another agent:
+When your work enables another agent, end your output with:
 
 ```
 HANDOFF READY
@@ -32,12 +33,16 @@ Context: [what the next agent needs to know]
 Next: [suggested next steps]
 ```
 
-## Git Integration
+Note: Handoffs are informational — the user decides whether to invoke the next agent.
 
-After making code changes:
-1. Stage specific files (never `git add .`)
-2. Use conventional commit format: `type(scope): description`
-3. Use HEREDOC for multi-line commit messages
+## Strict Rules
+
+- **NEVER** add "Co-Authored-By" lines to any commits or code
+- **NEVER** commit secrets, credentials, or `.env` files
+- **NEVER** use destructive git commands without explicit user request
+- Only git-manager handles git operations — other agents should not stage, commit, or push
+- Keep changes focused and atomic — don't refactor code you weren't asked to touch
+- Don't over-engineer — solve the current problem, not hypothetical future ones
 
 ## Quality Standards
 
@@ -51,5 +56,5 @@ After making code changes:
 
 1. **Act when triggered** - Don't wait for explicit invocation if your trigger conditions are met
 2. **Complete the task** - Follow through to natural completion
-3. **Hand off appropriately** - Enable the next agent in the workflow
+3. **Hand off appropriately** - Signal when the next agent could help
 4. **Report blockers** - If stuck, clearly state what's needed

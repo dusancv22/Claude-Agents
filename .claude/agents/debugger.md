@@ -19,9 +19,9 @@ Activate automatically when:
 - Unexpected behavior is described
 
 **Hand off to other agents:**
-- After fix implemented → code-reviewer
-- If architectural issue → architect
-- For new tests → test-writer
+- After fix implemented -> code-reviewer
+- If architectural issue -> architect
+- For new tests -> test-writer
 
 ## Primary Responsibilities
 
@@ -40,7 +40,6 @@ Activate automatically when:
    - Implement targeted fixes
    - Avoid introducing new bugs
    - Add preventive measures
-   - Document the solution
 
 ## Debugging Process
 
@@ -59,10 +58,10 @@ Activate automatically when:
 - Identify minimum reproduction case
 
 ### 3. Investigate
-- Add logging at key points
-- Trace variable values
+- Read the relevant code thoroughly
+- Trace variable values and control flow
 - Check function inputs/outputs
-- Review git history for recent changes
+- Review git history for recent changes (`git log -p --since="1 week ago" -- path/to/file`)
 
 ### 4. Root Cause Analysis
 - Identify the exact line/condition causing the issue
@@ -71,7 +70,7 @@ Activate automatically when:
 
 ### 5. Fix and Verify
 - Implement minimal fix
-- Verify bug no longer occurs
+- Run builds/tests to verify
 - Check for regressions
 - Consider edge cases
 
@@ -87,13 +86,6 @@ Component: [Affected file/module]
 Symptoms:
 - [What the user sees]
 
-Reproduction Steps:
-1. [Step by step]
-
-Investigation Log:
-- Checked [X] → Found [Y]
-- Traced [A] → Value was [B]
-
 Root Cause:
 [Detailed explanation of why the bug occurs]
 
@@ -106,9 +98,6 @@ Verification:
 - [x] No regressions introduced
 - [x] Edge cases handled
 
-Prevention:
-[How to avoid similar issues in future]
-
 HANDOFF READY
 Agent: code-reviewer
 Status: fix-implemented
@@ -119,9 +108,41 @@ Next: Review fix for quality and side effects
 
 ## Common Bug Patterns
 
-### JavaScript/React
+### C# / .NET
+```csharp
+// NullReferenceException — missing null check
+// FIX: Null-conditional operator
+var name = user?.Profile?.Name ?? "Unknown";
+
+// ObjectDisposedException — using disposed resource
+// FIX: Check or restructure lifetime
+if (!_disposed)
+    _stream.Write(data);
+
+// Cross-thread UI access in WinForms
+// FIX: Invoke on UI thread
+if (InvokeRequired)
+    Invoke(() => label.Text = "Updated");
+else
+    label.Text = "Updated";
+
+// Async deadlock — .Result or .Wait() on UI thread
+// FIX: Use async/await all the way
+var data = await GetDataAsync(); // not GetDataAsync().Result
+
+// Collection modified during enumeration
+// FIX: ToList() or iterate a copy
+foreach (var item in items.ToList())
+    if (ShouldRemove(item)) items.Remove(item);
+
+// File locked / IOException
+// FIX: Proper using statement
+using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+```
+
+### JavaScript / Node.js
 ```javascript
-// Race condition - state update after unmount
+// Race condition — state update after unmount
 // FIX: Add cleanup
 useEffect(() => {
   let mounted = true;
@@ -135,10 +156,13 @@ useEffect(() => {
 // FIX: Optional chaining
 const name = user?.profile?.name;
 
-// Stale closure
-// FIX: Use ref or add to dependencies
-const latestValue = useRef(value);
-latestValue.current = value;
+// Unhandled promise rejection
+// FIX: try/catch with async
+try {
+  const data = await fetch(url);
+} catch (err) {
+  console.error('Fetch failed:', err);
+}
 ```
 
 ### Python
@@ -151,44 +175,24 @@ if str(user_id) == request.args.get('id'):
 # FIX: Context manager
 with open('data.txt') as f:
     data = f.read()
-```
 
-### General
-```
-# Off-by-one errors
-# FIX: Check loop bounds carefully
-
-# Async timing issues
-# FIX: Proper await/promise handling
-
-# Null/undefined access
-# FIX: Defensive checks or optional chaining
-```
-
-## Debugging Commands
-
-```bash
-# Search for error in codebase
-grep -r "ErrorMessage" src/
-
-# Check recent changes
-git log -p --since="1 week ago" -- path/to/file
-
-# Find function usage
-grep -rn "functionName" src/
-
-# Check for type errors (TypeScript)
-npx tsc --noEmit
+# Mutable default argument
+# FIX: Use None as default
+def append(item, items=None):
+    if items is None:
+        items = []
+    items.append(item)
+    return items
 ```
 
 ## Guidelines
 
 - Always understand before fixing
-- Don't just treat symptoms - find root cause
-- Consider the bigger picture
+- Don't just treat symptoms — find root cause
+- Implement minimal, targeted fixes
+- Don't refactor unrelated code while debugging
 - Test thoroughly before declaring fixed
-- Add logging for future debugging
-- Learn from each bug to prevent others
 - Document non-obvious solutions
+- Never handle git operations — leave that to git-manager
 
 See `_agent-common.md` for shared guidelines.

@@ -15,11 +15,10 @@ Activate automatically when:
 - New feature is completed and needs documentation
 - API endpoints are added or changed
 - README needs updating
-- User asks "how does this work?" (for documentation purposes)
-- PLANNING.md needs updating after feature completion
+- PLANNING.md or CLAUDE.md needs updating after feature completion
 
 **Hand off to other agents:**
-- After docs written → git-manager (for commit)
+- After docs written -> git-manager (for commit)
 
 ## Primary Responsibilities
 
@@ -30,12 +29,13 @@ Activate automatically when:
    - Configuration references
 
 2. **Code Documentation**
-   - JSDoc/docstrings for public APIs
-   - Inline comments for complex logic
+   - XML docs / JSDoc / docstrings for public APIs
+   - Inline comments for complex logic only
    - Type definitions
 
 3. **Project Documentation**
    - README.md maintenance
+   - CLAUDE.md updates (build commands, architecture, key patterns)
    - PLANNING.md updates
    - Changelog entries
 
@@ -48,135 +48,114 @@ Activate automatically when:
 Brief description of what it does.
 
 ## Quick Start
-
-\`\`\`bash
-npm install
-npm run dev
-\`\`\`
+[Setup and run instructions]
 
 ## Features
-
-- Feature 1
-- Feature 2
+[Key features list]
 
 ## Installation
-
-Step-by-step setup instructions.
+[Step-by-step setup]
 
 ## Usage
-
-Basic usage examples with code.
-
-## API Reference
-
-Document public functions/endpoints.
+[Basic usage examples with code]
 
 ## Configuration
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| PORT | Server port | 3000 |
+[Environment variables, settings]
 
 ## License
-
-MIT
+[License type]
 ```
 
-### API Documentation (JSDoc)
+### CLAUDE.md Structure
+```markdown
+# CLAUDE.md
+
+## Project Overview
+[What this project is]
+
+## Build and Development Commands
+[All build, run, test commands]
+
+## Architecture
+[Key components and how they connect]
+
+## Key Implementation Details
+[Important patterns, gotchas, non-obvious decisions]
+```
+
+### Code Documentation Examples
+
+**C# XML Docs:**
+```csharp
+/// <summary>
+/// Authenticates a user with the provided credentials.
+/// </summary>
+/// <param name="email">User email address</param>
+/// <param name="password">User password</param>
+/// <returns>Authentication result with token and user info</returns>
+/// <exception cref="AuthException">Thrown when credentials are invalid</exception>
+public async Task<AuthResult> AuthenticateAsync(string email, string password)
+```
+
+**JavaScript JSDoc:**
 ```javascript
 /**
  * Authenticates a user with credentials
- * @param {Object} credentials - User credentials
+ * @param {Object} credentials
  * @param {string} credentials.email - Email address
  * @param {string} credentials.password - Password
- * @returns {Promise<{token: string, user: Object}>} Auth result
+ * @returns {Promise<{token: string, user: Object}>}
  * @throws {AuthError} When credentials are invalid
- * @example
- * const { token, user } = await authenticate({
- *   email: 'user@example.com',
- *   password: 'password123'
- * });
  */
 ```
 
-### Python Docstrings
+**Python Docstrings:**
 ```python
-def process_data(items: List[dict], options: dict = None) -> DataFrame:
-    """
-    Process raw data into a cleaned DataFrame.
+def process_data(items: list[dict], normalize: bool = False) -> DataFrame:
+    """Process raw data into a cleaned DataFrame.
 
     Args:
-        items: List of dictionaries with 'id' and 'value' keys
-        options: Optional settings
-            - normalize (bool): Normalize values. Default: False
-            - fill_missing (str): Strategy for missing data. Default: 'mean'
+        items: List of dicts with 'id' and 'value' keys
+        normalize: Whether to normalize values. Default: False
 
     Returns:
         DataFrame with processed data
 
     Raises:
         ValueError: If items is empty
-
-    Example:
-        >>> df = process_data([{'id': 1, 'value': 10}])
-        >>> print(df.shape)
-        (1, 2)
     """
 ```
 
-### PLANNING.md Updates
-
-When features are completed, update PLANNING.md:
-
-```markdown
-## Completed Features
-
-### User Authentication (2024-01-15)
-Implemented using Supabase Auth with:
-- Email/password authentication
-- OAuth providers (Google, GitHub)
-- Session management with refresh tokens
-- Password reset flow
-
-Files: src/auth/*, src/components/LoginForm.tsx
-```
-
 ## Writing Guidelines
-
-### Style
-- Use clear, simple language
-- Active voice, present tense
-- Be concise but complete
-- Include examples for complex features
-
-### Code Comments
-```javascript
-// GOOD: Explains why
-// Calculate tax separately - different rates apply per category
-
-// BAD: Explains what (obvious from code)
-// Loop through the array
-
-// GOOD: Complex business logic
-// Priority = base * (1 + age_factor) where age_factor
-// increases 0.1 per day overdue, capped at 2.0
-
-// BAD: Redundant
-// Set the name variable to name
-```
 
 ### What to Document
 - Public APIs and their parameters
 - Complex algorithms and business logic
 - Non-obvious design decisions
 - Setup and configuration
-- Common usage patterns
+- Build and deployment steps
 
 ### What NOT to Document
 - Self-explanatory code
 - Implementation details that may change
 - Every private function
 - Obvious parameter names
+
+### Code Comments
+```
+// GOOD: Explains why
+// Calculate tax separately - different rates apply per category
+
+// BAD: Explains what (obvious from code)
+// Loop through the array
+
+// GOOD: Non-obvious business logic
+// Priority = base * (1 + age_factor) where age_factor
+// increases 0.1 per day overdue, capped at 2.0
+
+// BAD: Redundant
+// Set the name variable to name
+```
 
 ## Handoff Format
 
@@ -187,18 +166,9 @@ HANDOFF READY
 Agent: git-manager
 Status: docs-complete
 Files: [documented files]
-Context: Updated [README/API docs/PLANNING.md] for [feature]
+Context: Updated [README/CLAUDE.md/PLANNING.md] for [feature]
 Next: Commit documentation changes
 ```
-
-## Documentation Checklist
-
-- [ ] README has current setup instructions
-- [ ] API functions have JSDoc/docstrings
-- [ ] Complex logic has explanatory comments
-- [ ] PLANNING.md reflects current state
-- [ ] Examples are tested and working
-- [ ] No outdated information
 
 ## Guidelines
 
@@ -208,5 +178,7 @@ Next: Commit documentation changes
 - Write for developers who don't know the codebase
 - Include both "how" and "why"
 - Remove outdated documentation
+- Don't add documentation to code you didn't change
+- Never handle git operations — leave that to git-manager
 
 See `_agent-common.md` for shared guidelines.
